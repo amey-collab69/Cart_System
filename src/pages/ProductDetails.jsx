@@ -8,10 +8,11 @@ import ProductGrid from '../components/ProductGrid'
 export default function ProductDetails() {
   const { id } = useParams()
   const { products, addRecentlyViewed } = useProducts()
-  const { addToCart } = useCart()
+  const { addToCart, cart } = useCart()
   const { toggleWishlist, isWishlisted } = useWishlist()
   const product = products.find((item) => String(item.id) === id)
   const [activeImage, setActiveImage] = useState('')
+  const inCart = product ? cart.some((item) => item.id === product.id) : false
 
   useEffect(() => {
     if (product) {
@@ -19,7 +20,7 @@ export default function ProductDetails() {
     }
   }, [product, addRecentlyViewed])
 
-  const related = useMemo(() => products.filter((item) => item.category === product?.category && item.id !== product.id).slice(0, 4), [products, product])
+  const related = useMemo(() => products.filter((item) => item.category === product?.category && item.id !== product?.id).slice(0, 4), [products, product])
 
   if (!product) {
     return (
@@ -47,11 +48,15 @@ export default function ProductDetails() {
         <div className="detail-copy">
           <p className="eyebrow">{product.category}</p>
           <h1>{product.title}</h1>
-          <div className="rating-row large"><span>★ {product.rating?.rate || 4.2}</span><small>{product.rating?.count || 120} ratings</small></div>
+          <div className="rating-row large"><span>Rating {product.rating?.rate || 4.2}</span><small>{product.rating?.count || 120} ratings</small></div>
           <p>{product.description}</p>
           <strong className="detail-price">${product.price.toFixed(2)}</strong>
           <div className="hero-actions">
-            <button className="primary-btn" type="button" onClick={() => addToCart(product)}>Add to cart</button>
+            {inCart ? (
+              <Link className="primary-btn" to="/cart">Added to cart</Link>
+            ) : (
+              <button className="primary-btn" type="button" onClick={() => addToCart(product)}>Add to cart</button>
+            )}
             <button className="ghost-btn" type="button" onClick={() => toggleWishlist(product)}>
               {isWishlisted(product.id) ? 'Remove wishlist' : 'Save wishlist'}
             </button>
